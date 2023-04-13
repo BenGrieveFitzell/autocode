@@ -1,28 +1,22 @@
-import Head from "next/head";
-import { useState } from "react";
-import { Octokit } from "octokit";
+import { useState, useEffect } from "react";
 import { BsSend } from "react-icons/bs";
-import { useRouter } from "next/router";
 
-const octokit = new Octokit({
-  auth: "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",
-});
-
-export default function Home() {
-  const router = useRouter();
+function Widget() {
   const [code, setCode] = useState("");
   const [change, setChange] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
-  const [pageLocation, setPageLocation] = useState("");
+
+  useEffect(() => {
+    const currentPage = window.location.pathname.substring(
+      window.location.pathname.lastIndexOf("/")
+    );
+    console.log(currentPage);
+  });
 
   async function onSubmit(event) {
     event.preventDefault();
     setLoading(true);
-    const currentPage = window.location.pathname.substring(
-      window.location.pathname.lastIndexOf("/") + 1
-    );
-    console.log(currentPage); // outputs "TestPage"
 
     try {
       const response = await octokit.request(
@@ -64,48 +58,10 @@ export default function Home() {
       alert(error.message);
     }
   }
-
   return (
-    <div>
-      <Head>
-        <title>testing</title>
-        <link rel="icon" href="" />
-      </Head>
-
-      <main className="bg-white h-full flex flex-col justify-between">
-        {/* <Header /> */}
-
-        <div className="flex-1 p-4 overflow-y-auto">
-          <>
-            <div>
-              <div>
-                <button onClick={() => router.push("/TestPage")}>
-                  Go to test page
-                </button>
-              </div>
-              <h2 className="mt-[60px]">
-                New updated code being generated based on user feedback that
-                will then be sent back to github in new branch:
-              </h2>
-              {result && (
-                <div className="my-4 py-2 px-4 bg-gray-100 rounded-lg text-gray-800">
-                  {result}
-                </div>
-              )}{" "}
-            </div>
-          </>
-          <div>
-            <h2 className="mt-[60px]">
-              Initial code being fetched from GitHub below:
-            </h2>
-            {code && (
-              <div className="my-4 py-2 px-4 bg-gray-100 rounded-lg text-gray-800">
-                {code}
-              </div>
-            )}
-          </div>
-        </div>
-
+    <>
+      {code ? <p>{code}</p> : <p></p>}
+      <div>
         <form
           onSubmit={onSubmit}
           className="flex items-center bg-gray-100 px-4 py-2 fixed bottom-0 w-full md:w-[500px] md:bottom-8 md:left-[20%] lg:w-[700px] lg:left-[28%]"
@@ -122,7 +78,9 @@ export default function Home() {
             {loading ? <p>...</p> : <BsSend />}
           </button>
         </form>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }
+
+export default Widget;

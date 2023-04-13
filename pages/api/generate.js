@@ -17,24 +17,17 @@ export default async function (req, res) {
   }
 
   const change = req.body.change || "";
-  if (change.trim().length === 0) {
-    res.status(400).json({
-      error: {
-        message: "Please enter a valid change",
-      },
-    });
-    return;
-  }
+  const code = req.body.code || "";
 
   try {
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: generatePrompt(change),
-      temperature: 0.6,
+      prompt: generatePrompt(change, code),
+      max_tokens: 2024,
+      temperature: 0.9,
     });
-    res.status(200).json({ result: completion.data.choices[0].text });
+    res.status(200).json({ finalResult: completion.data.choices[0].text });
   } catch (error) {
-    // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data);
       res.status(error.response.status).json(error.response.data);
@@ -50,9 +43,8 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(change) {
-  const capitalizedChange =
-    change[0].toUpperCase() + change.slice(1).toLowerCase();
-  return `Generate the code for the change the user is implying by their review: ${capitalizedChange}
+function generatePrompt(change, code) {
+  // const formattedCode = JSON.stringify(code);
+  return `Make the change to the code. Here is the change: ${change}; and here is the code: ${code}.
     `;
 }
