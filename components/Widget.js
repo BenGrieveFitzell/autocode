@@ -1,22 +1,30 @@
 import { useState, useEffect } from "react";
 import { BsSend } from "react-icons/bs";
+import { Octokit } from "octokit";
+import generate from "../pages/api/generate";
 
 function Widget() {
   const [code, setCode] = useState("");
   const [change, setChange] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const [location, setLocation] = useState("");
 
   useEffect(() => {
     const currentPage = window.location.pathname.substring(
       window.location.pathname.lastIndexOf("/")
     );
-    console.log(currentPage);
+    setLocation(currentPage);
+    console.log(location);
   });
 
   async function onSubmit(event) {
     event.preventDefault();
     setLoading(true);
+
+    const octokit = new Octokit({
+      auth: "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",
+    });
 
     try {
       const response = await octokit.request(
@@ -24,7 +32,7 @@ function Widget() {
         {
           owner: "BenGrieveFitzell", // Replace with the owner of the repository
           repo: "autocode", // Replace with the name of the repository
-          path: "pages/index.js", // Replace with the path to the file you want to retrieve
+          path: `pages${location}`, // Replace with the path to the file you want to retrieve
         }
       );
       const code = Buffer.from(response.data.content, "base64").toString();
@@ -37,7 +45,7 @@ function Widget() {
         );
       }
 
-      return fetch("/api/generate", {
+      return fetch("http://localhost:3000/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
